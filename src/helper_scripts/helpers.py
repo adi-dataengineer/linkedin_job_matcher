@@ -19,7 +19,7 @@ def extract_job_ids_from_json(file_path):
 
 
 if __name__ == '__main__':
-    file_path = "../job_scrapper/linkedin_jobs_101165590.json"
+    file_path = "../data_files/raw/linkedin_jobs_101165590.json"
     job_ids_iterator = extract_job_ids_from_json(file_path)
 
     for job_id in job_ids_iterator:

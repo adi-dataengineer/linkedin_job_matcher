@@ -1,5 +1,6 @@
 import json
 import os
+from time import sleep
 
 import requests
 from dotenv import load_dotenv
@@ -7,7 +8,7 @@ from dotenv import load_dotenv
 from src.helper_scripts.helpers import extract_job_ids_from_json
 
 
-def fetch_linkedin_jobs(api_key, job_title, geoid, page, output_file):
+def fetch_linkedin_job_ids(api_key, job_title, geoid, page, output_file):
     """
     Fetch job listings from LinkedIn using ScrapingDog API and save the response as a JSON file.
 
@@ -38,47 +39,6 @@ def fetch_linkedin_jobs(api_key, job_title, geoid, page, output_file):
         print(f"Data saved to {output_file}")
     else:
         print(f"Request failed with status code: {response.status_code}")
-
-
-def fetch_linkedin_job_details(api_key, job_ids, output_file):
-    """
-    Fetch job details from LinkedIn using ScrapingDog API and save the details to a JSON file.
-
-    Args:
-    - api_key (str): The API key for ScrapingDog.
-    - job_ids (list): A list of job IDs to fetch details for.
-    - output_file (str): The file path to save the job details JSON data.
-
-    Returns:
-    - None
-    """
-    url = "https://api.scrapingdog.com/linkedinjobs"
-    all_job_details = []
-
-    for job_id in job_ids:
-        params = {
-            "api_key": api_key,
-            "job_id": job_id
-        }
-
-        response = requests.get(url, params=params)
-
-        if response.status_code == 200:
-            job_details = response.json()  # Assuming the API returns JSON data
-            all_job_details.append(job_details)
-        else:
-            print(f"Request for job ID {job_id} failed with status code: {response.status_code}")
-
-    # Write all job details to the output file
-    with open(output_file, 'w') as f:
-        json.dump(all_job_details, f, indent=4)
-
-    print(f"Job details saved to {output_file}")
-
-
-import requests
-import json
-from time import sleep
 
 
 def fetch_linkedin_job_details(api_key, job_ids, output_file):
@@ -127,17 +87,17 @@ def fetch_linkedin_job_details(api_key, job_ids, output_file):
     print(f"Job details saved to {output_file}")
 
 
-def main(fetch_fresh_data):
+def fetch_job_jsons(fetch_fresh_data):
     load_dotenv()
     api_key = os.getenv('api_key')
     job_title = "data engineer"
     geoid = "101165590"  # GeoID for London
     page_count = "10"
-    jobs_output_file = f"linkedin_jobs_{geoid}.json"
-    job_overview_output_file = f"linkedin_jobs_overview_{geoid}.json"
+    jobs_output_file = f"../data_files/raw/linkedin_jobs_{geoid}.json"
+    job_overview_output_file = f"../data_files/raw/linkedin_jobs_overview_{geoid}.json"
 
     if fetch_fresh_data:
-        fetch_linkedin_jobs(api_key=api_key, job_title=job_title, geoid=geoid, page=page_count,
+        fetch_linkedin_job_ids(api_key=api_key, job_title=job_title, geoid=geoid, page=page_count,
                             output_file=jobs_output_file)
 
     job_ids = extract_job_ids_from_json(jobs_output_file)
@@ -147,4 +107,4 @@ def main(fetch_fresh_data):
 
 
 if __name__ == '__main__':
-    main(fetch_fresh_data=False)
+    fetch_job_jsons(fetch_fresh_data=False)
