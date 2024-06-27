@@ -1,0 +1,23 @@
+linkedin_jobs_101165590:
+  fields:
+    - job_position
+    - job_link
+    - job_id
+    - company_name
+    - company_profile
+    - job_location
+    - job_posting_date
+
+linkedin_jobs_overview_101165590:
+  fields:
+    - job_position
+    - company_linkedin_id
+    - base_pay
+    - job_description
+    - Seniority_level
+    - Employment_type
+    - Job_function
+    - Industries
+    - recruiter_details:
+        - recruiter_name
+        - recruiter_profile_url
