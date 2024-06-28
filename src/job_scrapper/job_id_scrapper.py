@@ -22,19 +22,14 @@ def fetch_linkedin_job_ids(api_key, job_title, geoid, page, output_file):
     Returns:
     - None
     """
-    url = "https://api.scrapingdog.com/linkedinjobs/"
-    params = {
-        "api_key": api_key,
-        "field": job_title,
-        "geoid": geoid,
-        "page": page
-    }
+    url = os.getenv("URL")
+    params = {"api_key": api_key, "field": job_title, "geoid": geoid, "page": page}
 
     response = requests.get(url, params=params)
 
     if response.status_code == 200:
         data = response.json()
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(data, f, indent=4)
         print(f"Data saved to {output_file}")
     else:
@@ -53,19 +48,16 @@ def fetch_linkedin_job_details(api_key, job_ids, output_file):
     Returns:
     - None
     """
-    url = "https://api.scrapingdog.com/linkedinjobs"
+    url = os.getenv("URL")
     all_job_details = []
     batch_size = 10  # Adjust the batch size based on API limits and performance
 
-    job_id_batches = [list(job_ids)[i:i + batch_size] for i in range(0, len(job_ids), batch_size)]
+    job_id_batches = [list(job_ids)[i : i + batch_size] for i in range(0, len(job_ids), batch_size)]
 
     for batch in job_id_batches:
         batch_job_details = []
         for job_id in batch:
-            params = {
-                "api_key": api_key,
-                "job_id": job_id
-            }
+            params = {"api_key": api_key, "job_id": job_id}
 
             try:
                 response = requests.get(url, params=params)
@@ -81,24 +73,22 @@ def fetch_linkedin_job_details(api_key, job_ids, output_file):
         all_job_details.extend(batch_job_details)
 
     # Write all job details to the output file
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(all_job_details, f, indent=4)
 
     print(f"Job details saved to {output_file}")
 
 
-def fetch_job_jsons(fetch_fresh_data):
+def fetch_job_jsons(fetch_fresh_data, job_title, geoid, page_count, jobs_output_file_path):
     load_dotenv()
-    api_key = os.getenv('api_key')
-    job_title = "data engineer"
-    geoid = "101165590"  # GeoID for London
-    page_count = "10"
-    jobs_output_file = f"../data_files/raw/linkedin_jobs_{geoid}.json"
-    job_overview_output_file = f"../data_files/raw/linkedin_jobs_overview_{geoid}.json"
+    api_key = os.getenv("API_KEY")
+    jobs_output_file = f"{jobs_output_file_path}/linkedin_jobs_{geoid}.json"
+    job_overview_output_file = f"{jobs_output_file_path}/linkedin_jobs_overview_{geoid}.json"
 
     if fetch_fresh_data:
-        fetch_linkedin_job_ids(api_key=api_key, job_title=job_title, geoid=geoid, page=page_count,
-                            output_file=jobs_output_file)
+        fetch_linkedin_job_ids(
+            api_key=api_key, job_title=job_title, geoid=geoid, page=page_count, output_file=jobs_output_file
+        )
 
     job_ids = extract_job_ids_from_json(jobs_output_file)
 
@@ -106,5 +96,13 @@ def fetch_job_jsons(fetch_fresh_data):
         fetch_linkedin_job_details(api_key=api_key, job_ids=job_ids, output_file=job_overview_output_file)
 
 
-if __name__ == '__main__':
-    fetch_job_jsons(fetch_fresh_data=False)
+if __name__ == "__main__":
+    from config_files.config import geoid, job_title, page_scrape_cnt, raw_zone
+
+    fetch_job_jsons(
+        fetch_fresh_data=False,
+        job_title=job_title,
+        geoid=geoid,
+        page_count=page_scrape_cnt,
+        jobs_output_file_path=f"../../{raw_zone}",
+    )
